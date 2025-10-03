@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hostel Bill Calculator - Cafe Kamal</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <meta name="theme-color" content="#4CAF50">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .container, .entries-log {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover { background: #388E3C; }
+    .totals, .final-totals {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 6px;
+    }
+    .totals { background: #E8F5E9; }
+    .final-totals { background: #FFF3CD; }
+    .entry-item {
+      padding: 8px;
+      margin: 5px 0;
+      background: #F8F9FA;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+    }
+    @media (min-width: 768px) {
+      .container, .entries-log { width: 45%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Hostel Bill Calculator</h2>
+    <input type="number" id="price" step="0.01" placeholder="Enter price">
+    <input type="text" id="participants" placeholder="Participants (Z,U,M,B,A)">
+    <button onclick="addEntry()">Add Entry</button>
+    <button onclick="showFinal()">Show Final Bills</button>
+    <button onclick="resetAll()">Reset</button>
+    <div class="totals" id="currentTotals"></div>
+    <div class="final-totals" id="finalTotals"></div>
+  </div>
+
+  <div class="entries-log">
+    <h3>Entries Log</h3>
+    <div id="entriesList"></div>
+  </div>
+
+  <script>
+    let bills = { Z:0, U:0, M:0, B:0, A:0 };
+    const nameMap = { Z:"Zeshan", U:"Umam", M:"Rasool", B:"Abdullah", A:"Aziz" };
+
+    function validateParticipants(p) {
+      return p.split('').every(c => Object.keys(bills).includes(c));
+    }
+
+    function updateDisplay() {
+      let html = '<h3>Current Totals:</h3>';
+      for(const [c,total] of Object.entries(bills)) {
+        html += `${nameMap[c]}: ₹${total.toFixed(2)}<br>`;
+      }
+      document.getElementById("currentTotals").innerHTML = html;
+    }
+
+    function logEntry(price, participants) {
+      const entryDiv = document.createElement("div");
+      entryDiv.className = "entry-item";
+      const names = participants.split('').map(c=>nameMap[c]).join(", ");
+      entryDiv.innerHTML = `<span>₹${price.toFixed(2)} - ${names}</span>
+                            <button onclick="this.parentElement.remove()">❌</button>`;
+      document.getElementById("entriesList").prepend(entryDiv);
+    }
+
+    function addEntry() {
+      const price = parseFloat(document.getElementById("price").value);
+      const participants = document.getElementById("participants").value.toUpperCase();
+
+      if(!price || price<=0) return alert("Enter valid price");
+      if(!participants || !validateParticipants(participants)) return alert("Invalid participants");
+
+      const share = price / participants.length;
+      for(const c of participants) bills[c] += share;
+
+      logEntry(price, participants);
+      updateDisplay();
+      document.getElementById("price").value="";
+      document.getElementById("participants").value="";
+    }
+
+    function showFinal() {
+      let html = "<h3>Final Monthly Bills:</h3>";
+      let total=0;
+      for(const [c,t] of Object.entries(bills)) {
+        html += `${nameMap[c]}: ₹${t.toFixed(2)}<br>`;
+        total += t;
+      }
+      html += `<hr><b>Total Amount: ₹${total.toFixed(2)}</b>`;
+      document.getElementById("finalTotals").innerHTML = html;
+    }
+
+    function resetAll() {
+      bills = { Z:0, U:0, M:0, B:0, A:0 };
+      document.getElementById("currentTotals").innerHTML="";
+      document.getElementById("finalTotals").innerHTML="";
+      document.getElementById("entriesList").innerHTML="";
+    }
+
+    if("serviceWorker" in navigator){
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+</body>
+</html>
