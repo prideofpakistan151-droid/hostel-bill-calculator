@@ -14,4 +14,4 @@ A responsive web app to calculate hostel bills for Cafe Kamal.
 2. Click "Install" (or Add to Home Screen on mobile)
 
 ## Live Demo
-👉 (Your GitHub Pages link here)
+👉 https://prideofpakistan151-droid.github.io/hostel-bill-calculator/
